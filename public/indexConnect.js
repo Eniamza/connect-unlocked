@@ -76,127 +76,213 @@ function convertTime24to12(time24) {
 }
 
 async function execute() {
-        let usisdata = await fetch("https://usis-cdn.eniamza.com/connect.json");
-        usisdata = await usisdata.json();
-        // let lastUpdated = usisdata.lastUpdated;
-        // const formattedTime = formatTimestamp(lastUpdated);
-        // usisdata = usisdata.data;
+    let usisdata = await fetch("https://usis-cdn.eniamza.com/connect.json");
+    usisdata = await usisdata.json();
+    // let lastUpdated = usisdata.lastUpdated;
+    // const formattedTime = formatTimestamp(lastUpdated);
+    // usisdata = usisdata.data;
 
-        usisdata.sort(function(a, b) {
-            let courseA = `${a.courseCode}-${a.sectionName}`;
-            let courseB = `${b.courseCode}-${b.sectionName}`;
-            return courseA.localeCompare(courseB);
-        });
-    
-        // console.log(usisdata);
-    
-        let table = document.getElementById("table");
+    usisdata.sort(function (a, b) {
+        let courseA = `${a.courseCode}-${a.sectionName}`;
+        let courseB = `${b.courseCode}-${b.sectionName}`;
+        return courseA.localeCompare(courseB);
+    });
 
-        table.querySelectorAll("tr:not(:first-child)").forEach(row => row.remove());
+    // console.log(usisdata);
 
-        // let lastUpdatedElement = document.getElementById("lastUpdatedTime");
-        // lastUpdatedElement.innerText = `Last Updated: ${formattedTime}`;
-        let facultyArray = [];
-        usisdata.forEach(element => {
+    let table = document.getElementById("table");
 
-            // const classScheduleArray = element.classSchedule.split(/,\s*/);
-            // const classLabScheduleArray = element.classLabSchedule.split(/\n/);
-            let classScheduleArray = []
-            let labScheduleArray = []
-            
-            if(element.sectionSchedule !== null){
-                classScheduleArray = element.sectionSchedule.classSchedules.map(schedule => {
-                    return `${schedule.day} ${convertTime24to12(schedule.startTime)} - ${convertTime24to12(schedule.endTime)} - ${element.roomName}`;
-                });
-                
-            }
+    table.querySelectorAll("tr:not(:first-child)").forEach(row => row.remove());
 
-            if(element.labSchedules !== null){
-                labScheduleArray = element.labSchedules.map(schedule => {
-                    return `${schedule.day} ${convertTime24to12(schedule.startTime)} - ${convertTime24to12(schedule.endTime)} - ${element.labRoomName}`;
-                });
-            }
-    
+    // let lastUpdatedElement = document.getElementById("lastUpdatedTime");
+    // lastUpdatedElement.innerText = `Last Updated: ${formattedTime}`;
+    let facultyArray = [];
+    usisdata.forEach(element => {
 
-            let preReq = element.prerequisiteCourses
-            // (CSE110) OR (CSE161) OR (EEE103) OR (ECE103) , Alternatively (CSE111 AND CSE230) Or it might be (CSE110)
-            if (element.prerequisiteCourses !== null){
-                if (element.prerequisiteCourses.includes("AND")){
-                    preReq = element.prerequisiteCourses.split("AND").map(item => {
-                        return item.replace("(","").replace(")","")
-                    }).join("+\n")
-                }
-                else if (element.prerequisiteCourses.includes("OR")){
-                    preReq = element.prerequisiteCourses.split("OR").map(item => {
-                        return item.replace("(","").replace(")","")
-                    }).join("/\n")
-                }
-                else {
-                    preReq = element.prerequisiteCourses.replace("(","").replace(")","")
-                }
-            }
-            else {
-                preReq = ""
-            }
+        // const classScheduleArray = element.classSchedule.split(/,\s*/);
+        // const classLabScheduleArray = element.classLabSchedule.split(/\n/);
+        let classScheduleArray = []
+        let labScheduleArray = []
 
-            let courseDetails = `${element.courseCode}-[${element.sectionName}]`
-            let finalExamDetail = ""
-            // console.log(element)
-            if (element.sectionSchedule !== null){
-                finalExamDetail = element.sectionSchedule.finalExamDetail
-            } else {
-                finalExamDetail = "Not Available"
-            }
-    
-            let tr = document.createElement("tr");
-            console.log(element);
-            if (element.faculties) {
-                    facultyArray.push(...element.faculties.split(",").map(faculty => faculty.trim()));
-            }
-            else {
-                facultyArray.push("TBA");
-                element.faculties = "TBA";
-            }
-            let values = [
-                courseDetails,
-                element.faculties,
-                preReq,
-                element.capacity,
-                element.consumedSeat,
-                `${element.capacity - element.consumedSeat}`,
-                classScheduleArray.join("\n"), //Class Schedule 
-                labScheduleArray.join("\n"), //Lab Schedule
-                finalExamDetail
-            ];
-    
-            values.forEach(item => {
-                let td = document.createElement("td");
-                let classesAdd = ["break-words","border-2","border-gray-400","text-center","p-3"]
-                td.classList.add(...classesAdd)
-
-                td.innerText = item;
-                tr.appendChild(td);
+        if (element.sectionSchedule !== null) {
+            classScheduleArray = element.sectionSchedule.classSchedules.map(schedule => {
+                return `${schedule.day} ${convertTime24to12(schedule.startTime)} - ${convertTime24to12(schedule.endTime)} - ${element.roomName}`;
             });
-    
-            table.appendChild(tr);
+
+        }
+
+        if (element.labSchedules !== null) {
+            labScheduleArray = element.labSchedules.map(schedule => {
+                return `${schedule.day} ${convertTime24to12(schedule.startTime)} - ${convertTime24to12(schedule.endTime)} - ${element.labRoomName}`;
+            });
+        }
+
+
+        let preReq = element.prerequisiteCourses
+        // (CSE110) OR (CSE161) OR (EEE103) OR (ECE103) , Alternatively (CSE111 AND CSE230) Or it might be (CSE110)
+        if (element.prerequisiteCourses !== null) {
+            if (element.prerequisiteCourses.includes("AND")) {
+                preReq = element.prerequisiteCourses.split("AND").map(item => {
+                    return item.replace("(", "").replace(")", "")
+                }).join("+\n")
+            }
+            else if (element.prerequisiteCourses.includes("OR")) {
+                preReq = element.prerequisiteCourses.split("OR").map(item => {
+                    return item.replace("(", "").replace(")", "")
+                }).join("/\n")
+            }
+            else {
+                preReq = element.prerequisiteCourses.replace("(", "").replace(")", "")
+            }
+        }
+        else {
+            preReq = ""
+        }
+
+        let courseDetails = `${element.courseCode}-[${element.sectionName}]`
+        let finalExamDetail = ""
+        // console.log(element)
+        if (element.sectionSchedule !== null) {
+            finalExamDetail = element.sectionSchedule.finalExamDetail
+        } else {
+            finalExamDetail = "Not Available"
+        }
+
+        let tr = document.createElement("tr");
+        tr.id = `row-${element.sectionId}`;
+        // console.log(element);
+        if (element.faculties) {
+            facultyArray.push(...element.faculties.split(",").map(faculty => faculty.trim()));
+        }
+        else {
+            facultyArray.push("TBA");
+            element.faculties = "TBA";
+        }
+        let values = [
+            courseDetails,
+            element.faculties,
+            preReq,
+            element.capacity,
+            element.consumedSeat,
+            `${element.capacity - element.consumedSeat}`,
+            classScheduleArray.join("\n"), //Class Schedule 
+            labScheduleArray.join("\n"), //Lab Schedule
+            finalExamDetail
+        ];
+
+        values.forEach(item => {
+            let td = document.createElement("td");
+            let classesAdd = ["break-words", "border-2", "border-gray-400", "text-center", "p-3"]
+            td.classList.add(...classesAdd)
+
+            td.innerText = item;
+            tr.appendChild(td);
         });
 
-        facultyArray.sort();
-        let facultySet = new Set(facultyArray);
-        let selectElement = document.getElementById("selectFaculties");
+        table.appendChild(tr);
+    });
 
-        facultySet.forEach(faculty => {
-            let option = document.createElement("option");
-            option.value = faculty;
-            option.textContent = faculty;
-            selectElement.appendChild(option);
-        });
-    }
-    
+    facultyArray.sort();
+    let facultySet = new Set(facultyArray);
+    let selectElement = document.getElementById("selectFaculties");
+
+    facultySet.forEach(faculty => {
+        let option = document.createElement("option");
+        option.value = faculty;
+        option.textContent = faculty;
+        selectElement.appendChild(option);
+    });
+}
+
 
 execute(); // Initial fetch
 
+function initMercure() {
+    const url = new URL("https://mercure.eniamza.com/.well-known/mercure");
+    url.searchParams.append("topic", "seatstatus");
 
-    
+    // Use EventSource to connect to Mercure
+    const eventSource = new EventSource(url);
 
-    
+    window.handleMercureMessage = (event) => {
+        const data = JSON.parse(event.data);
+        const seatStatus = data.seatStatus;
+
+        if (data.timestamp) {
+            let lastUpdatedElement = document.getElementById("lastUpdatedTime");
+            if (lastUpdatedElement) {
+                lastUpdatedElement.innerText = `Last Updated (Live): ${formatTimestamp(data.timestamp)}`;
+            }
+        }
+
+        if (Object.keys(seatStatus).length === 0) return; // No changed seats
+
+        for (const [sectionId, newConsumedStr] of Object.entries(seatStatus)) {
+            const newConsumed = parseInt(newConsumedStr);
+            const row = document.getElementById(`row-${sectionId}`);
+            if (row) {
+                const consumedCell = row.children[4];
+                const availableCell = row.children[5];
+
+                const oldConsumed = parseInt(consumedCell.innerText);
+                const capacity = parseInt(row.children[3].innerText);
+
+                if (oldConsumed !== newConsumed) {
+                    consumedCell.innerText = newConsumed;
+                    availableCell.innerText = capacity - newConsumed;
+
+                    // Remove existing animation classes to reset the animation
+                    row.classList.remove('highlight-book', 'highlight-empty');
+
+                    // Trigger a DOM reflow to restart the CSS animation
+                    void row.offsetWidth;
+
+                    if (newConsumed > oldConsumed) {
+                        // Seat was booked: Turn Red
+                        row.classList.add('highlight-book');
+                    } else {
+                        // Seat became empty: Turn Green
+                        row.classList.add('highlight-empty');
+                    }
+                }
+            }
+        }
+
+        // Ensure filters are reapplied visually after updating row capacities
+        if (typeof window.reapplyCurrentFilters === 'function') {
+            window.reapplyCurrentFilters();
+        }
+    };
+
+    eventSource.onerror = (error) => {
+        console.error("Mercure connection error:", error);
+    };
+}
+
+// Inject CSS styles for the soft backglow animations
+const style = document.createElement('style');
+style.textContent = `
+@keyframes highlight-red {
+    0% { background-color: rgba(220, 38, 38, 0.4); box-shadow: inset 0 0 15px rgba(220, 38, 38, 0.8); }
+    100% { background-color: transparent; box-shadow: inset 0 0 0px transparent; }
+}
+@keyframes highlight-green {
+    0% { background-color: rgba(34, 197, 94, 0.4); box-shadow: inset 0 0 15px rgba(34, 197, 94, 0.8); }
+    100% { background-color: transparent; box-shadow: inset 0 0 0px transparent; }
+}
+.highlight-book td {
+    animation: highlight-red 2s ease-out forwards;
+}
+.highlight-empty td {
+    animation: highlight-green 2s ease-out forwards;
+}
+`;
+document.head.appendChild(style);
+
+initMercure();
+
+
+
+
+
+

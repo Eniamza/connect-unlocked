@@ -21,10 +21,10 @@ function filter() {
     input.addEventListener('keyup', (event) => {
         filterState.search = event.target.value.toUpperCase();
         console.log("Search input changed:", filterState.search);
-        
+
         // Clear existing timeout
         clearTimeout(debounceTimeout);
-        
+
         // Set new timeout to apply filters after 300ms delay
         debounceTimeout = setTimeout(() => {
             applyFilters(filterState);
@@ -45,7 +45,7 @@ function filter() {
         // Check if options are populated
         const optionCount = element.querySelectorAll('option').length;
         console.log("Options found:", optionCount);
-        
+
         if (optionCount > 0) {
             // Options are populated, initialize Choices.js
             choices = new Choices(element, {
@@ -72,20 +72,20 @@ function filter() {
                 uniqueItemText: 'Only unique values can be added',
                 customAddItemText: 'Only values matching specific conditions can be added',
                 addItemText: (value, rawValue) => {
-                  return `Press Enter to add <b>"${value}"</b>`;
+                    return `Press Enter to add <b>"${value}"</b>`;
                 },
                 removeItemIconText: () => `Remove item`,
                 removeItemLabelText: (value, rawValue) => `Remove item: ${value}`,
                 maxItemText: (maxItemCount) => {
-                  return `Only ${maxItemCount} values can be added`;
+                    return `Only ${maxItemCount} values can be added`;
                 },
                 valueComparer: (value1, value2) => {
-                  return value1 === value2;
+                    return value1 === value2;
                 },
                 // Choices uses the great Fuse library for searching. You
                 // can find more options here: https://fusejs.io/api/options.html
                 fuseOptions: {
-                  includeScore: false
+                    includeScore: false
                 },
                 labelId: '',
                 callbackOnInit: null,
@@ -114,6 +114,7 @@ function filter() {
     function applyFilters(filters) {
         console.log("Applying filters:", filters);
         const table = document.getElementById("table");
+        if (!table) return;
         const rows = table.getElementsByTagName("tr");
 
         for (let i = 1; i < rows.length; i++) { // Start from 1 to skip the header row
@@ -148,6 +149,9 @@ function filter() {
         }
     }
 
+    // Expose a global method to force-reapply the current filters from anywhere
+    window.reapplyCurrentFilters = () => applyFilters(filterState);
+
     // Apply filters button event handler
     document.getElementById('applyFiltersButton').addEventListener('click', () => {
         applyFilters(filterState);
@@ -158,28 +162,28 @@ function filter() {
         filterState.search = "";
         filterState.hideFilled = false;
         filterState.onlyShowFaculties = [];
-        
+
         // Reset UI elements
         document.getElementById("searchInput").value = "";
-        
+
         // Reset toggle button - ensure both the checked property and visual state are updated
         const toggleInput = availableSeatToggle.querySelector('input[type="checkbox"]');
         toggleInput.checked = false;
-        
+
         // For Tailwind toggle components, we need to manually trigger the peer class effect
         // by dispatching a change event
         toggleInput.dispatchEvent(new Event('change', { bubbles: true }));
-        
+
         // Reset Choices.js selection
         if (choices) {
             choices.removeActiveItems();
         }
-        
+
         // Apply reset filters
         applyFilters(filterState);
         console.log("Filters reset");
     });
-    
+
 }
 
 // Initialize the filter functionality
