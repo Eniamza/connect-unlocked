@@ -254,6 +254,8 @@ function initMercure() {
         }
     };
 
+    eventSource.onmessage = window.handleMercureMessage;
+
     eventSource.onerror = (error) => {
         console.error("Mercure connection error:", error);
     };
