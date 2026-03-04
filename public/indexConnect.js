@@ -76,11 +76,10 @@ function convertTime24to12(time24) {
 }
 
 async function execute() {
-    let usisdata = await fetch("https://usis-cdn.eniamza.com/connect.json");
+    let usisdata = await fetch("https://usis-cdn.eniamza.com/connect-migrate.json");
     usisdata = await usisdata.json();
-    // let lastUpdated = usisdata.lastUpdated;
-    // const formattedTime = formatTimestamp(lastUpdated);
-    // usisdata = usisdata.data;
+    let lastUpdated = new Date(usisdata.metadata.lastUpdated);
+    usisdata = usisdata.courses;
 
     usisdata.sort(function (a, b) {
         let courseA = `${a.courseCode}-${a.sectionName}`;
@@ -94,8 +93,8 @@ async function execute() {
 
     table.querySelectorAll("tr:not(:first-child)").forEach(row => row.remove());
 
-    // let lastUpdatedElement = document.getElementById("lastUpdatedTime");
-    // lastUpdatedElement.innerText = `Last Updated: ${formattedTime}`;
+    let lastUpdatedElement = document.getElementById("lastUpdatedTime");
+    lastUpdatedElement.innerHTML = `Last Updated (1m Interval): <span class="text-cyan-400">${lastUpdated.toLocaleString()}</span>`;
     let facultyArray = [];
     usisdata.forEach(element => {
 
@@ -211,7 +210,7 @@ function initMercure() {
         if (data.timestamp) {
             let lastUpdatedElement = document.getElementById("lastUpdatedTime");
             if (lastUpdatedElement) {
-                lastUpdatedElement.innerText = `Last Updated (Live): ${formatTimestamp(data.timestamp)}`;
+                lastUpdatedElement.innerHTML = `Last Updated (1m Interval): <span class="text-cyan-400">${new Date(data.timestamp).toLocaleString()}</span>`;
             }
         }
 
